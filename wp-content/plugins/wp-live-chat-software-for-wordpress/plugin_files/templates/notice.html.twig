@@ -1,0 +1,80 @@
+<div id="lc-notice-container" class="notice"></div>
+
+<script>
+    var LC_TOKEN = '{{ lcToken }}';
+    var STORE_TOKEN = '{{ storeToken }}';
+    var WP_VER = '{{ wpVer }}';
+    var WOO_VER = '{{ wooVer }}';
+    var MODULE_VER = '{{ moduleVer }}';
+    var PLATFORM = '{{ platform }}';
+    var OPTIONS = '{{ options }}';
+
+    var PLATFORM_VERSION = [WP_VER, WOO_VER].join('#');
+
+    (function () {
+        var interval = setInterval(function () {
+            if (window.AppBridge === undefined) {
+                return;
+            }
+            clearInterval(interval);
+
+            function parseOptions(options) {
+                try {
+                    return JSON.parse(options);
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function adminAjaxCall(action, data = {}, type = 'POST') {
+                return jQuery.ajax({
+                    url: ajaxurl, //ajaxurl is WP global variable
+                    type,
+                    data: {
+                        ...data,
+                        action,
+                        security: ajax_nonce.value
+                    }
+                });
+            }
+
+            function reviewNoticeCleanup() {
+                if (optionsCleared) {
+                    return;
+                }
+
+                adminAjaxCall('lc_review_notice_cleanup');
+                optionsCleared = true;
+            }
+
+            var container = document.getElementById('lc-notice-container');
+            var iframeId = 'lc-notice-iframe';
+            var optionsCleared = false;
+
+            var eventsRegister = new AppBridge.EventsRegister();
+
+            eventsRegister.register(AppBridge.NoticeFetchedEvent, function (data) {
+                var iframe = document.getElementById(iframeId);
+                container.style.height = `${data.maxHeight}px`;
+                iframe.style.height = `${data.maxHeight}px`;
+
+                reviewNoticeCleanup();
+            });
+
+            AppBridge.AppBridgeParent.init(PLATFORM, eventsRegister, container, '{{ noticeUrl }}').then(function (bridge) {
+                container.getElementsByTagName('iframe')[0].id = iframeId;
+                bridgeInstance = bridge;
+
+                return bridge.call(AppBridge.GetNoticeCommand.fromObject({
+                    maxWidth: container.offsetWidth,
+                    storeToken: STORE_TOKEN,
+                    userToken: LC_TOKEN,
+                    platform: bridge.platform,
+                    platformVer: PLATFORM_VERSION,
+                    moduleVer: MODULE_VER,
+                    options: parseOptions(OPTIONS)
+                }));
+            });
+        }, 100);
+    })();
+</script>

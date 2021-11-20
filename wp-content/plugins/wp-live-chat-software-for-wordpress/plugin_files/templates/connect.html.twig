@@ -1,0 +1,135 @@
+<div id="lc-container"></div>
+
+<script>
+    var LC_TOKEN = '{{ lcToken }}';
+    var STORE_TOKEN = '{{ storeToken }}';
+    var SITE_URL = '{{ siteUrl }}';
+    var USER_EMAIL = '{{ userEmail }}';
+    var USER_NAME = '{{ userName }}'
+    var WP_VER = '{{ wpVer }}';
+    var EXTENSION_VER = '{{ extensionVer }}';
+    var MODULE_VER = '{{ moduleVer }}';
+    var PARTNER_ID = '{{ partnerId }}';
+    var UTM_CAMPAIGN = '{{ utmCampaign }}';
+    var LICENSE = '{{ license }}';
+    var LEGACY_OPTIONS = '{{ legacyOptions }}';
+    var PLATFORM = '{{ platform }}';
+    var PLATFORM_LANGUAGE_VER = '{{ platformLanguageVer }}';
+
+    var PLATFORM_VERSION = [WP_VER, EXTENSION_VER].filter(Boolean).join('#');
+
+    (function () {
+        var interval = setInterval(function () {
+            if (window.AppBridge === undefined) {
+                return;
+            }
+            clearInterval(interval);
+
+            function adminAjaxCall(action, data = {}, type = 'POST') {
+                return jQuery.ajax({
+                    url: ajaxurl, //ajaxurl is WP global variable
+                    type,
+                    data: {
+                        ...data,
+                        action,
+                        security: ajax_nonce.value
+                    }
+                });
+            }
+
+            function userSignedInHandler(userToken, storeToken) {
+                return adminAjaxCall('lc_connect', {
+                    user_token: userToken,
+                    store_token: storeToken
+                });
+            }
+
+            function appWasDisconnectedhandler() {
+                return adminAjaxCall('lc_disconnect');
+            }
+
+            function entityNotFound(entity) {
+                return adminAjaxCall(`lc_${entity}_not_found`).done(() => {
+                    window.location.reload();
+                });
+            }
+
+            function parseOptions(options) {
+                try {
+                    return JSON.parse(options);
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function widgetScriptUpdated(widgetURL) {
+                return adminAjaxCall('lc_widget_script_updated', { widget_url: widgetURL });
+            }
+
+            var eventsRegister = new AppBridge.EventsRegister();
+            eventsRegister.register(AppBridge.UserSignedInEvent, function (data) {
+                return userSignedInHandler(data.userToken, data.storeToken);
+            });
+            eventsRegister.register(AppBridge.AppWasDisconnectedEvent, function () {
+                return appWasDisconnectedhandler();
+            });
+            eventsRegister.register(AppBridge.ErrorOccurredEvent, function (data) {
+                if (data.statusCode !== 404) {
+                    return console.error(new Error(data.errorMessage));
+                }
+
+                if (data.errorMessage === 'Store was not found') {
+                    return entityNotFound('store');
+                }
+
+                if (data.errorMessage === 'User was not found') {
+                    return entityNotFound('user');
+                }
+            });
+            eventsRegister.register(AppBridge.WidgetScriptUpdatedEvent, function (data) {
+                return widgetScriptUpdated(data.widgetURL)
+            })
+
+            AppBridge.AppBridgeParent.init(PLATFORM, eventsRegister, document.getElementById('lc-container'), '{{ appUrl }}').then(function (bridge) {
+                document.getElementsByTagName('iframe')[0].classList.add('lc-iframe');
+
+                if (LC_TOKEN) {
+                    return bridge.call(AppBridge.SignInCommand.fromObject({
+                        userToken: LC_TOKEN,
+                        platform: bridge.platform,
+                        platformVer: PLATFORM_VERSION,
+                        moduleVer: MODULE_VER,
+                        options: parseOptions(LEGACY_OPTIONS),
+                        platformLanguageVer: PLATFORM_LANGUAGE_VER
+                    }));
+                }
+
+                if (STORE_TOKEN) {
+                    return bridge.call(AppBridge.JoinCommand.fromObject({
+                        storeToken: STORE_TOKEN,
+                        userId: USER_EMAIL,
+                        userName: USER_NAME,
+                        platform: bridge.platform,
+                        platformVer: PLATFORM_VERSION,
+                        moduleVer: MODULE_VER,
+                        platformLanguageVer: PLATFORM_LANGUAGE_VER
+                    }));
+                }
+
+                return bridge.call(AppBridge.ConnectCommand.fromObject({
+                    storeUrl: SITE_URL,
+                    userId: USER_EMAIL,
+                    userName: USER_NAME,
+                    platform: bridge.platform,
+                    platformVer: PLATFORM_VERSION,
+                    moduleVer: MODULE_VER,
+                    platformLanguageVer: PLATFORM_LANGUAGE_VER,
+                    partnerId: PARTNER_ID,
+                    utmCampaign: UTM_CAMPAIGN,
+                    license: LICENSE,
+                    options: parseOptions(LEGACY_OPTIONS),
+                }));
+            });
+        }, 100);
+    })();
+</script>

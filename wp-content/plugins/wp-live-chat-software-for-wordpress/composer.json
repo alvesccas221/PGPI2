@@ -1,0 +1,43 @@
+{
+    "name": "livechatinc/wordpress-integration",
+    "description": "LiveChat for WordPress",
+    "type": "wordpress-module",
+    "license": "AFL 3.0",
+    "authors": [
+        {
+            "name": "Livechat",
+            "email": "integrations@livechatinc.com"
+        }
+    ],
+    "require": {
+        "ext-json": "*",
+        "firebase/php-jwt": "^5.2.0",
+        "ext-curl": "*"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "*",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
+        "wp-coding-standards/wpcs": "^2.3.0",
+        "phpunit/phpunit": "~5.7.27",
+        "brain/monkey": "^2.4.0",
+        "mockery/mockery": "^1.3.2",
+        "phpcompatibility/phpcompatibility-wp": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "LiveChat\\": "plugin_files/"
+        },
+        "classmap": [
+            "plugin_files/"
+        ]
+    },
+    "scripts": {
+        "test": "phpunit -c phpunit.xml",
+        "static-analysis": "phpcs",
+        "fix-static-analysis": "phpcbf",
+        "bootstrap": "scripts/bootstrap.sh",
+        "post-install-cmd": "php composer.phar run-script bootstrap -- wordpress",
+        "clear-bootstrap": "rm -f .env changelog.txt config.php readme.txt woocommerce-livechat.php livechat.php",
+        "prepare-dist": "scripts/prepare-dist.sh"
+    }
+}

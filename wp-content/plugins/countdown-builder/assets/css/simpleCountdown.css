@@ -1,0 +1,40 @@
+.ycd-hide {
+    display: none !important;
+}
+
+.ycd-simple-current-unite {
+    display: inline-block;
+}
+
+.ycd-simple-countdown-time {
+    line-height: 1;
+}
+
+.ycd-simple-timer-dots {
+    display: inline-block;
+    vertical-align: top !important;
+    line-height: 1;
+    margin: 0 5px;
+}
+
+.ycd-simple-current-unite-wrapper {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.ycd-simple-countdown-number, .ycd-simple-timer-dots {
+    font-size: 35px;
+}
+
+.ycd-simple-countdown-label {
+    font-size: 12px;
+    text-align: center;
+}
+
+.ycd-simple-content-wrapper {
+    white-space: nowrap;
+}
+
+.ycd-simple-container {
+    transform-origin: top left;
+}

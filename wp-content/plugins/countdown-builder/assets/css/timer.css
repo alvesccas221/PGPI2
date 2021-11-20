@@ -1,0 +1,65 @@
+.ycd-timer-time {
+	line-height: 1em;
+	font-size: 6em;
+}
+
+.ycd-timer-container {
+
+}
+
+.ycd-timer-box {
+	margin: auto;
+	position: relative;
+	line-height: 1;
+}
+
+.ycd-timer-box > span {
+	position: relative;
+	color: #333;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.ycd-timmer-buttons {
+	margin-top: 10px;
+	text-align: center;
+}
+
+.ycd-timer-span-wrapper span.ycd-timer-number {
+	width: 92px;
+	vertical-align: text-top;
+}
+
+.ycd-timer-span-wrapper {
+	vertical-align: top;
+}
+
+.ycd-milliseconds-value {
+	display: inline-block;
+	width: 150px;
+}
+
+.ycd-hide {
+	display: none !important;
+}
+
+.ycd-dots {
+	vertical-align: text-top;
+	line-height: 1;
+}
+
+.ycd-timer-unit {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.ycd-timer-box-next {
+	height: 0;
+}
+
+.ycd-hide-label {
+	display: none;
+}
+
+.ycd-timer-box.ycd-timer-box-next {
+	display: none;
+}
